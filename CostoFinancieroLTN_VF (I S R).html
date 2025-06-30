@@ -1,0 +1,1485 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulador de Costo Financiero | Grupo LTN</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --color-primary: #4361ee;
+            --color-primary-dark: #3a56d4;
+            --color-secondary: #3f37c9;
+            --color-accent: #f72585;
+            --color-success: #4cc9f0;
+            --color-warning: #f8961e;
+            --color-danger: #ef233c;
+            --color-text: #2b2d42;
+            --color-text-light: #8d99ae;
+            --color-light: #f8f9fa;
+            --color-bg: #f8f9fa;
+            --color-card: #ffffff;
+            --color-border: #e9ecef;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.08);
+            --shadow-md: 0 4px 6px rgba(0,0,0,0.1);
+            --shadow-lg: 0 10px 25px rgba(0,0,0,0.1);
+            --radius-sm: 6px;
+            --radius-md: 10px;
+            --radius-lg: 14px;
+            --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--color-bg);
+            color: var(--color-text);
+            line-height: 1.6;
+            padding: 20px;
+            -webkit-font-smoothing: antialiased;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: var(--color-card);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-lg);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+            color: white;
+            padding: 25px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .header h2 {
+            font-weight: 700;
+            font-size: 24px;
+            margin: 0;
+            letter-spacing: -0.5px;
+        }
+        
+        .logo {
+            height: 40px;
+            filter: brightness(0) invert(1);
+        }
+        
+        .contenedor-principal {
+            display: flex;
+            gap: 25px;
+            padding: 25px;
+        }
+        
+        @media (max-width: 768px) {
+            .contenedor-principal {
+                flex-direction: column;
+            }
+        }
+        
+        .panel {
+            flex: 1;
+            background: var(--color-card);
+            border-radius: var(--radius-md);
+            padding: 20px;
+            box-shadow: var(--shadow-sm);
+            transition: var(--transition);
+        }
+        
+        .panel:hover {
+            box-shadow: var(--shadow-md);
+        }
+        
+        .panel-title {
+            color: var(--color-primary);
+            font-weight: 600;
+            font-size: 16px;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--color-border);
+            display: flex;
+            align-items: center;
+        }
+        
+        .panel-title svg {
+            margin-right: 8px;
+            width: 18px;
+            height: 18px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-row {
+            display: flex;
+            gap: 15px;
+        }
+        
+        .form-row .form-group {
+            flex: 1;
+            margin-bottom: 0;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            font-size: 14px;
+            color: var(--color-text);
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-sm);
+            font-size: 14px;
+            transition: var(--transition);
+            background-color: var(--color-light);
+        }
+        
+        .form-control:focus {
+            outline: none;
+            border-color: var(--color-primary);
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.15);
+        }
+        
+        .monto-container {
+            display: flex;
+            align-items: center;
+            position: relative;
+        }
+        
+        .monto-container .usd-symbol {
+            position: absolute;
+            left: 15px;
+            font-weight: 600;
+            color: var(--color-primary);
+        }
+        
+        .monto-container input {
+            padding-left: 50px !important;
+        }
+        
+        .param-box {
+            background-color: var(--color-light);
+            border-radius: var(--radius-sm);
+            padding: 15px;
+            position: relative;
+            display: none; /* Oculto por defecto */
+        }
+        
+        .business-rules-btn {
+            margin-top: 15px;
+            padding: 6px 12px;
+            font-size: 12px;
+            background-color: var(--color-primary);
+            color: white;
+            border: none;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            transition: var(--transition);
+        }
+
+        .business-rules-btn:hover {
+            background-color: var(--color-primary-dark);
+        }
+
+        .business-rules-btn .icon {
+            width: 14px;
+            height: 14px;
+        }
+        
+        .business-rules {
+            background: rgba(67, 97, 238, 0.05);
+            border-left: 3px solid var(--color-primary);
+            padding: 12px;
+            margin: 15px 0;
+            border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+        }
+        
+        .business-rules h4 {
+            font-size: 13px;
+            color: var(--color-primary);
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+        
+        .business-rules p {
+            font-size: 12px;
+            color: var(--color-text-light);
+            line-height: 1.5;
+        }
+        
+        .input-row {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .input-row label {
+            width: 70%;
+            font-weight: 500;
+            font-size: 13px;
+            color: var(--color-text);
+        }
+        
+        .input-row input {
+            width: 30%;
+            padding: 8px 10px;
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-sm);
+            font-size: 13px;
+            background-color: white;
+        }
+        
+        .field-instruction {
+            font-size: 12px;
+            color: var(--color-text-light);
+            font-style: italic;
+            margin: 5px 0 0 5px;
+            line-height: 1.4;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            font-size: 14px;
+            box-shadow: var(--shadow-sm);
+            border-radius: var(--radius-sm);
+            overflow: hidden;
+        }
+        
+        table th {
+            background-color: var(--color-primary);
+            color: white;
+            padding: 12px;
+            text-align: center;
+            font-weight: 500;
+            font-size: 13px;
+        }
+        
+        table td {
+            padding: 12px;
+            border: 1px solid var(--color-border);
+            text-align: center;
+            font-size: 13px;
+        }
+        
+        table tr:nth-child(even) {
+            background-color: var(--color-light);
+        }
+        
+        /* Estilos para la tabla simplificada */
+        .costo-empresa {
+            background-color: rgba(76, 201, 240, 0.1);
+            color: var(--color-success);
+            font-weight: 600;
+        }
+        
+        .costo-cliente {
+            background-color: rgba(239, 35, 60, 0.1);
+            color: var(--color-danger);
+            font-weight: 600;
+        }
+        
+        .costo-cero {
+            color: var(--color-text-light);
+            font-weight: normal;
+        }
+        
+        .costo-total {
+            font-weight: 600;
+        }
+
+        /* Estilos para móviles */
+        @media only screen and (max-width: 480px) {
+            body {
+                padding: 10px;
+                font-size: 14px;
+            }
+            
+            .container {
+                border-radius: var(--radius-md);
+            }
+            
+            .header {
+                padding: 15px 20px;
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .header h2 {
+                font-size: 20px;
+            }
+            
+            .contenedor-principal {
+                padding: 15px;
+                gap: 15px;
+            }
+            
+            .panel {
+                padding: 15px;
+            }
+            
+            table {
+                font-size: 12px;
+            }
+            
+            table th, table td {
+                padding: 8px 6px;
+            }
+            
+            .form-row {
+                flex-direction: column;
+                gap: 15px;
+            }
+        }
+
+        /* Nuevos estilos para las tarjetas de resumen */
+        .cards-container {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 15px;
+            margin: 0 25px 25px;
+        }
+
+        @media (min-width: 768px) {
+            .cards-container {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        .card {
+            background: white;
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-md);
+            padding: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card-total {
+            border-top: 4px solid var(--color-primary);
+            text-align: center;
+            grid-column: 1 / -1;
+        }
+
+        .card-absorbed {
+            border-left: 4px solid var(--color-success);
+        }
+
+        .card-transferred {
+            border-left: 4px solid var(--color-danger);
+        }
+
+        .card h3 {
+            margin-top: 0;
+            font-size: 16px;
+            color: var(--color-text-light);
+        }
+
+        .card-total h3 {
+            color: var(--color-primary);
+            font-weight: 600;
+            font-size: 18px;
+        }
+
+        .amount {
+            font-size: 24px;
+            font-weight: 700;
+            margin: 10px 0;
+        }
+
+        .card-total .amount {
+            font-size: 32px;
+            color: var(--color-primary);
+        }
+
+        .card-absorbed .amount,
+        .card-transferred .amount {
+            font-size: 20px;
+        }
+
+        .card-absorbed .amount {
+            color: var(--color-success);
+        }
+
+        .card-transferred .amount {
+            color: var(--color-danger);
+        }
+
+        .percentage {
+            font-size: 14px;
+            color: var(--color-text-light);
+        }
+
+        .card-total .percentage {
+            font-size: 16px;
+        }
+
+        .relation-arrow {
+            text-align: center;
+            margin: -5px 0;
+            color: var(--color-text-light);
+            font-size: 20px;
+            grid-column: 1 / -1;
+        }
+
+        .nota-debito {
+            font-size: 11px;
+            color: var(--color-text-light);
+            font-style: italic;
+            margin-top: 10px;
+        }
+
+        /* Estilos para el modal de parámetros */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background-color: white;
+            padding: 25px;
+            border-radius: var(--radius-md);
+            width: 90%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--color-primary);
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: var(--color-text-light);
+        }
+
+        .modal-footer {
+            margin-top: 20px;
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        /* Estilos para el switch de conversión */
+        .switch-container {
+            display: flex;
+            align-items: center;
+            margin-top: 10px;
+        }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 24px;
+            margin-right: 10px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 24px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 16px;
+            width: 16px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: var(--color-primary);
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+
+        #toggle-label {
+            font-size: 12px;
+            color: var(--color-text-light);
+            cursor: pointer;
+        }
+
+        .conversion-display {
+            font-size: 12px;
+            color: var(--color-text-light);
+            margin-top: 5px;
+            display: none;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .tc-value {
+            margin: 0 10px;
+            font-style: italic;
+        }
+
+        .ars-symbol {
+            display: none;
+        }
+        
+        .btn {
+            padding: 8px 16px;
+            border-radius: var(--radius-sm);
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+            border: none;
+        }
+        
+        .btn-primary {
+            background-color: var(--color-primary);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background-color: var(--color-primary-dark);
+        }
+        
+        .btn-danger {
+            background-color: var(--color-danger);
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background-color: #d11a2f;
+        }
+        
+        .promo-bonificacion {
+            font-size: 12px;
+            color: var(--color-success);
+            font-weight: 500;
+            display: block;
+            margin-top: 5px;
+        }
+        
+        /* Estilos para las líneas de pago personalizadas */
+        .pago-linea {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+            align-items: center;
+        }
+        
+        .pago-linea .form-control {
+            flex: 1;
+        }
+        
+        .pago-linea .eliminar-linea {
+            padding: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .pago-linea .eliminar-linea .icon {
+            width: 14px;
+            height: 14px;
+        }
+        
+        #lineas-pago {
+            margin-bottom: 15px;
+        }
+        
+        #total-porcentaje {
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+        
+        #error-porcentaje {
+            color: var(--color-danger);
+            font-size: 12px;
+            margin-bottom: 10px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h2>Simulador de Costo Financiero</h2>
+            <img src="https://via.placeholder.com/150x40?text=Grupo+LTN" alt="Logo Grupo LTN" class="logo">
+        </div>
+        
+        <div class="contenedor-principal">
+            <div class="panel">
+                <h3 class="panel-title">
+                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 2v4m0 12v4M4.93 4.93l2.83 2.83m8.48 8.48l2.83 2.83M2 12h4m12 0h4M4.93 19.07l2.83-2.83m8.48-8.48l2.83-2.83"></path>
+                    </svg>
+                    Parámetros de la Operación
+                </h3>
+                
+                <div class="form-group">
+                    <label>Monto base</label>
+                    <div class="monto-container">
+                        <span class="usd-symbol">USD</span>
+                        <input type="tel" id="monto" value="1.000,00" class="form-control monto-formateado" inputmode="decimal" autofocus>
+                    </div>
+                    <p class="field-instruction">Ingrese el monto base en dólares americanos (formato 1.000,00)</p>
+                    
+                    <div id="conversion-container">
+                        <div class="conversion-display">
+                            <span class="usd-symbol">USD</span>
+                            <span id="monto-usd">1.000,00</span>
+                            <span class="tc-value">T/C: <span id="tipo-cambio">1</span></span>
+                            <span class="ars-symbol">AR$</span>
+                            <span id="monto-ars">1.000,00</span>
+                        </div>
+                    </div>
+                    
+                    <div class="switch-container">
+                        <label class="switch">
+                            <input type="checkbox" id="toggle-conversion">
+                            <span class="slider"></span>
+                        </label>
+                        <span id="toggle-label">Mostrar en AR$</span>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>IVA (%)</label>
+                        <select id="iva" class="form-control">
+                            <option value="0">Exento (0%)</option>
+                            <option value="10.5">10.5%</option>
+                            <option value="21" selected>21%</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Percepción IIBB (%)</label>
+                        <input type="number" id="iibb" value="0" min="0" step="0.1" class="form-control">
+                    </div>
+                </div>
+                <p class="field-instruction">Seleccione la alícuota de IVA y el porcentaje de percepción de IIBB si corresponde</p>
+                
+                <div class="form-group">
+                    <label>Forma de pago</label>
+                    <select id="formaPago" class="form-control">
+                        <!-- Opciones con Transferencia Inicial -->
+                        <option value="100,0">100% Transferencia a 0 días</option>
+                        
+                        <!-- 50% Transferencia + Cheques -->
+                        <option value="50,0;50,30">50% Transferencia a 0 días / 50% Cheque a 30 días</option>
+                        <option value="50,0;25,30;25,60">50% Transferencia a 0 días / 25% Cheque a 30 días / 25% Cheque a 60 días</option>
+                        <option value="50,0;16.67,30;16.67,60;16.67,90">50% Transferencia a 0 días / 16.67% Cheque a 30 días / 16.67% Cheque a 60 días / 16.67% Cheque a 90 días</option>
+                        <option value="50,0;12.5,30;12.5,60;12.5,90;12.5,120">50% Transferencia a 0 días / 12.5% Cheque a 30 días / 12.5% Cheque a 60 días / 12.5% Cheque a 90 días / 12.5% Cheque a 120 días</option>
+                        <option value="50,0;10,30;10,60;10,90;10,120;10,150">50% Transferencia a 0 días / 10% Cheque a 30 días / 10% Cheque a 60 días / 10% Cheque a 90 días / 10% Cheque a 120 días / 10% Cheque a 150 días</option>
+                        
+                        <!-- Promociones -->
+                        <option value="FORZADO_3CHEQUES"><span class="promo-ltn">Promo GrupoLTN:</span> 3 cheques: 33.33% a 30/60/90 días (CF 5%)</option>
+                        <option value="FORZADO_6CHEQUES"><span class="promo-ltn">Promo GrupoLTN:</span> 6 cheques: 16.67% a 30/60/90/120/150/180 días (CF 9.35%)</option>
+                        <option value="FORZADO_9CHEQUES"><span class="promo-ltn">Promo GrupoLTN:</span> 9 cheques: 11.11% cada 30 días (hasta 270 días) (CF 13.92%)</option>
+                        <option value="FORZADO_12CHEQUES"><span class="promo-ltn">Promo GrupoLTN:</span> 12 cheques: 8.33% cada 30 días (hasta 360 días) (CF 17.85%)</option>
+                        
+                        <!-- Personalizada -->
+                        <option value="PERSONALIZADO">Personalizada</option>
+                    </select>
+                    <p class="field-instruction">Seleccione la forma de pago o elija "Personalizada" para configurar</p>
+                    <div class="nota-forzado" id="nota-forzado"></div>
+                    
+                    <div id="personalizado-container" style="display: none;">
+                        <div id="lineas-pago"></div>
+                        <button id="agregar-linea" class="btn btn-primary">
+                            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="12" y1="5" x2="12" y2="19"></line>
+                                <line x1="5" y1="12" x2="19" y2="12"></line>
+                            </svg>
+                            Agregar línea
+                        </button>
+                        <div id="total-porcentaje">Total: <span id="porcentaje-total">0</span>%</div>
+                        <div id="error-porcentaje" class="error">La suma de porcentajes debe ser exactamente 100%</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="panel">
+                <h3 class="panel-title">
+                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="12" y1="1" x2="12" y2="23"></line>
+                        <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                    </svg>
+                    Parámetros Financieros
+                </h3>
+                
+                <button id="show-rules-btn" class="business-rules-btn" title="Editar reglas de negocio">
+                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                        <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                    </svg>
+                    Reglas
+                </button>
+                
+                <div class="param-box" id="param-box">
+                    <div class="input-row">
+                        <label for="tasa">Tasa anual (%):</label>
+                        <input type="number" id="tasa" value="37" class="form-control">
+                    </div>
+                    
+                    <div class="business-rules">
+                        <h4>Reglas de Negocio</h4>
+                        <p>Máximo de días de cheques diferidos con tasa bonificada al 100% según el porcentaje de transferencia inmediata en la forma de pago seleccionada.</p>
+                    </div>
+                    
+                    <div class="input-row">
+                        <label for="b20">20% contado:</label>
+                        <input type="number" id="b20" value="30" class="form-control">
+                    </div>
+                    <div class="input-row">
+                        <label for="b30">30% contado:</label>
+                        <input type="number" id="b30" value="60" class="form-control">
+                    </div>
+                    <div class="input-row">
+                        <label for="b40">40% contado:</label>
+                        <input type="number" id="b40" value="90" class="form-control">
+                    </div>
+                    <div class="input-row">
+                        <label for="b50">50% contado:</label>
+                        <input type="number" id="b50" value="120" class="form-control">
+                    </div>
+                    <div class="input-row">
+                        <label for="b60">60% contado:</label>
+                        <input type="number" id="b60" value="150" class="form-control">
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="panel" style="margin: 0 25px 25px;">
+            <h3 class="panel-title">
+                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                </svg>
+                Detalle de la Operación
+            </h3>
+            <table id="resultado">
+                <thead>
+                    <tr>
+                        <th>Tipo</th>
+                        <th>%</th>
+                        <th>Días</th>
+                        <th>Importe</th>
+                        <th>Costo Final</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+        
+        <!-- Nuevo sistema de tarjetas para el resumen -->
+        <div class="cards-container">
+            <!-- Tarjeta principal - Total Operación -->
+            <div class="card card-total">
+                <h3>TOTAL OPERACIÓN</h3>
+                <div class="amount">USD 0.00</div>
+                <div class="percentage" id="total-operacion-percentage">100%</div>
+            </div>
+
+            <!-- Tarjeta Costo Financiero Total -->
+            <div class="card card-total">
+                <h3>COSTO FINANCIERO TOTAL</h3>
+                <div class="amount">USD 0.00</div>
+                <div class="percentage" id="costo-financiero-percentage">0% del total</div>
+            </div>
+
+            <div class="relation-arrow">↓</div>
+
+            <!-- Tarjetas de distribución -->
+            <div class="card card-absorbed">
+                <h3>ABSORBIDO POR EMPRESA</h3>
+                <div class="amount">USD 0.00</div>
+                <div class="percentage" id="absorbido-percentage">0% del total</div>
+            </div>
+
+            <div class="card card-transferred">
+                <h3>TRASLADAR AL CLIENTE</h3>
+                <div class="amount">USD 0.00</div>
+                <div class="percentage" id="trasladado-percentage">0% del total</div>
+                <div class="nota-debito">* El costo financiero se cobra mediante nota de débito</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para editar reglas de negocio -->
+    <div class="modal" id="rules-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Editar Reglas de Negocio</h3>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="param-box" style="display: block;">
+                <div class="input-row">
+                    <label for="modal-tasa">Tasa anual (%):</label>
+                    <input type="number" id="modal-tasa" value="37" class="form-control">
+                </div>
+                
+                <div class="business-rules">
+                    <h4>Reglas de Negocio</h4>
+                    <p>Máximo de días de cheques diferidos con tasa bonificada al 100% según el porcentaje de transferencia inmediata en la forma de pago seleccionada.</p>
+                </div>
+                
+                <div class="input-row">
+                    <label for="modal-b20">20% contado:</label>
+                    <input type="number" id="modal-b20" value="30" class="form-control">
+                </div>
+                <div class="input-row">
+                    <label for="modal-b30">30% contado:</label>
+                    <input type="number" id="modal-b30" value="60" class="form-control">
+                </div>
+                <div class="input-row">
+                    <label for="modal-b40">40% contado:</label>
+                    <input type="number" id="modal-b40" value="90" class="form-control">
+                </div>
+                <div class="input-row">
+                    <label for="modal-b50">50% contado:</label>
+                    <input type="number" id="modal-b50" value="120" class="form-control">
+                </div>
+                <div class="input-row">
+                    <label for="modal-b60">60% contado:</label>
+                    <input type="number" id="modal-b60" value="150" class="form-control">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="cancel-rules" class="btn btn-danger">Cancelar</button>
+                <button id="save-rules" class="btn btn-primary">Guardar</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Configuración de costos forzados
+        const COSTOS_FORZADOS = {
+            'FORZADO_3CHEQUES': { porcentaje: 5, tramos: [
+                { porcentaje: 33.33, dias: 30 },
+                { porcentaje: 33.33, dias: 60 },
+                { porcentaje: 33.33, dias: 90 }
+            ]},
+            'FORZADO_6CHEQUES': { porcentaje: 9.35, tramos: [
+                { porcentaje: 16.67, dias: 30 },
+                { porcentaje: 16.67, dias: 60 },
+                { porcentaje: 16.67, dias: 90 },
+                { porcentaje: 16.67, dias: 120 },
+                { porcentaje: 16.67, dias: 150 },
+                { porcentaje: 16.67, dias: 180 }
+            ]},
+            'FORZADO_9CHEQUES': { porcentaje: 13.92, tramos: [
+                { porcentaje: 11.11, dias: 30 },
+                { porcentaje: 11.11, dias: 60 },
+                { porcentaje: 11.11, dias: 90 },
+                { porcentaje: 11.11, dias: 120 },
+                { porcentaje: 11.11, dias: 150 },
+                { porcentaje: 11.11, dias: 180 },
+                { porcentaje: 11.11, dias: 210 },
+                { porcentaje: 11.11, dias: 240 },
+                { porcentaje: 11.11, dias: 270 }
+            ]},
+            'FORZADO_12CHEQUES': { porcentaje: 17.85, tramos: [
+                { porcentaje: 8.33, dias: 30 },
+                { porcentaje: 8.33, dias: 60 },
+                { porcentaje: 8.33, dias: 90 },
+                { porcentaje: 8.33, dias: 120 },
+                { porcentaje: 8.33, dias: 150 },
+                { porcentaje: 8.33, dias: 180 },
+                { porcentaje: 8.33, dias: 210 },
+                { porcentaje: 8.33, dias: 240 },
+                { porcentaje: 8.33, dias: 270 },
+                { porcentaje: 8.33, dias: 300 },
+                { porcentaje: 8.33, dias: 330 },
+                { porcentaje: 8.33, dias: 360 }
+            ]}
+        };
+
+        // Días disponibles para cheques
+        const DIAS_CHEQUES = [0, 7, 15, 30, 45, 60, 75, 90];
+        // Agregar de 30 en 30 hasta 360
+        for (let i = 120; i <= 360; i += 30) {
+            DIAS_CHEQUES.push(i);
+        }
+
+        // Variables para conversión
+        let enPesos = false;
+        let tipoCambio = 1;
+
+        // Función para formatear números con separadores
+        function formatearNumero(numero) {
+            const valor = enPesos ? numero * tipoCambio : numero;
+            return valor.toFixed(2).replace(".", ",").replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+        }
+
+        // Función para convertir el formato visual a número
+        function parsearNumeroFormateado(valor) {
+            return parseFloat(valor.replace(/\./g, "").replace(",", ".")) || 0;
+        }
+
+        // Función para calcular interés simple racional
+        function calcularInteres(importe, tasaAnual, dias) {
+            if (dias === 0) return 0;
+            const tasaDecimal = tasaAnual / 100;
+            const valorDescontado = importe / (1 + tasaDecimal * dias / 365);
+            return importe - valorDescontado;
+        }
+
+        // Función para convertir a pesos
+        function convertirAPesos() {
+            if (enPesos) {
+                // Volver a dólares
+                enPesos = false;
+                document.getElementById('conversion-container').style.display = 'none';
+                document.getElementById('toggle-label').textContent = 'Mostrar en AR$';
+                actualizarMoneda();
+                calcular();
+            } else {
+                // Convertir a pesos
+                const nuevoTipoCambio = parseFloat(prompt("Ingrese el tipo de cambio (USD a AR$):", tipoCambio));
+                
+                if (isNaN(nuevoTipoCambio) || nuevoTipoCambio <= 0) {
+                    alert("Tipo de cambio inválido");
+                    return;
+                }
+                
+                tipoCambio = nuevoTipoCambio;
+                enPesos = true;
+                document.getElementById('conversion-container').style.display = 'block';
+                document.querySelector('.conversion-display').style.display = 'flex';
+                document.getElementById('tipo-cambio').textContent = tipoCambio.toFixed(2);
+                document.getElementById('monto-usd').textContent = document.getElementById('monto').value;
+                document.getElementById('toggle-label').textContent = 'Mostrar en USD';
+                actualizarMoneda();
+                calcular();
+            }
+        }
+
+        // Función para actualizar botón y símbolos
+        function actualizarMoneda() {
+            const simbolosUSD = document.querySelectorAll('.simbolo-usd, .usd-symbol');
+            const simbolosARS = document.querySelectorAll('.ars-symbol');
+            
+            simbolosUSD.forEach(el => {
+                el.textContent = 'USD';
+            });
+            
+            if (enPesos) {
+                simbolosARS.forEach(el => {
+                    el.style.display = 'inline';
+                });
+            } else {
+                simbolosARS.forEach(el => {
+                    el.style.display = 'none';
+                });
+            }
+        }
+
+        // Manejo del campo monto formateado
+        document.getElementById("monto").addEventListener("input", function(e) {
+            // Obtener posición del cursor
+            const cursorPos = e.target.selectionStart;
+            const valorOriginal = e.target.value;
+            
+            // Limpiar el valor
+            let valor = valorOriginal.replace(/[^\d,]/g, "");
+            
+            // Manejar comas (solo permitir una)
+            const comas = valor.match(/,/g);
+            if (comas && comas.length > 1) {
+                valor = valor.substring(0, valor.lastIndexOf(","));
+            }
+            
+            // Separar parte entera y decimal
+            let partes = valor.split(",");
+            let parteEntera = partes[0] || "";
+            let parteDecimal = partes[1] || "";
+            
+            // Limitar decimales a 2
+            if (parteDecimal.length > 2) {
+                parteDecimal = parteDecimal.substring(0, 2);
+            }
+            
+            // Formatear parte entera con separadores de miles
+            parteEntera = parteEntera.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+            
+            // Reconstruir valor
+            let nuevoValor = parteEntera;
+            if (parteDecimal) {
+                nuevoValor += "," + parteDecimal;
+            }
+            
+            // Actualizar el valor en el campo
+            e.target.value = nuevoValor;
+            
+            // Restaurar posición del cursor
+            const delta = nuevoValor.length - valorOriginal.length;
+            e.target.setSelectionRange(cursorPos + delta, cursorPos + delta);
+            
+            calcular();
+        });
+
+        function actualizarNotaForzado() {
+            const formaPago = document.getElementById("formaPago").value;
+            const nota = document.getElementById("nota-forzado");
+            
+            if (formaPago in COSTOS_FORZADOS && COSTOS_FORZADOS[formaPago].porcentaje) {
+                nota.innerHTML = `<span class="promo-bonificacion">Costo Financiero bonificado <span id="porcentaje-bonificado">${COSTOS_FORZADOS[formaPago].porcentaje}</span>%</span>`;
+                nota.style.display = 'block';
+            } else {
+                nota.style.display = 'none';
+            }
+        }
+
+        // Manejo de la forma de pago personalizada
+        function manejarFormaPagoPersonalizada() {
+            const formaPago = document.getElementById("formaPago").value;
+            const personalizadoContainer = document.getElementById("personalizado-container");
+            
+            if (formaPago === "PERSONALIZADO") {
+                personalizadoContainer.style.display = "block";
+                // Agregar primera línea si no hay ninguna
+                if (document.querySelectorAll(".pago-linea").length === 0) {
+                    agregarLineaPago();
+                }
+            } else {
+                personalizadoContainer.style.display = "none";
+            }
+        }
+
+        // Agregar una nueva línea de pago
+        function agregarLineaPago() {
+            const lineasPago = document.getElementById("lineas-pago");
+            const id = Date.now(); // ID único para la línea
+            
+            const lineaDiv = document.createElement("div");
+            lineaDiv.className = "pago-linea";
+            lineaDiv.dataset.id = id;
+            
+            // Generar opciones de porcentaje de 5 en 5 hasta 100
+            const porcentajeOptions = [];
+            for (let i = 5; i <= 100; i += 5) {
+                porcentajeOptions.push(`<option value="${i}">${i}%</option>`);
+            }
+            
+            lineaDiv.innerHTML = `
+                <select class="tipo-pago form-control">
+                    <option value="Transferencia">Transferencia</option>
+                    <option value="Cheque">Cheque</option>
+                </select>
+                <select class="porcentaje porcentaje-select form-control">
+                    ${porcentajeOptions.join('')}
+                </select>
+                <select class="dias form-control" style="display: none;">
+                    ${DIAS_CHEQUES.map(dia => `<option value="${dia}">${dia} días</option>`).join('')}
+                </select>
+                <button class="eliminar-linea btn btn-danger">
+                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
+            `;
+            
+            lineasPago.appendChild(lineaDiv);
+            
+            // Manejar cambio de tipo de pago
+            const tipoSelect = lineaDiv.querySelector(".tipo-pago");
+            tipoSelect.addEventListener("change", function() {
+                const diasSelect = lineaDiv.querySelector(".dias");
+                diasSelect.style.display = this.value === "Cheque" ? "block" : "none";
+                actualizarPorcentajeTotal();
+                calcular();
+            });
+            
+            // Manejar cambio de porcentaje
+            const porcentajeSelect = lineaDiv.querySelector(".porcentaje");
+            porcentajeSelect.addEventListener("change", function() {
+                actualizarPorcentajeTotal();
+                calcular();
+            });
+            
+            // Manejar cambio de días
+            const diasSelect = lineaDiv.querySelector(".dias");
+            diasSelect.addEventListener("change", calcular);
+            
+            // Manejar eliminación de línea
+            const eliminarBtn = lineaDiv.querySelector(".eliminar-linea");
+            eliminarBtn.addEventListener("click", function() {
+                lineasPago.removeChild(lineaDiv);
+                actualizarPorcentajeTotal();
+                calcular();
+            });
+            
+            actualizarPorcentajeTotal();
+        }
+
+        // Actualizar el total de porcentaje
+        function actualizarPorcentajeTotal() {
+            const porcentajes = Array.from(document.querySelectorAll(".porcentaje")).map(select => parseFloat(select.value) || 0);
+            const total = porcentajes.reduce((sum, val) => sum + val, 0);
+            
+            document.getElementById("porcentaje-total").textContent = total.toFixed(2);
+            
+            const errorElement = document.getElementById("error-porcentaje");
+            if (Math.abs(total - 100) > 0.01) {
+                errorElement.style.display = "block";
+            } else {
+                errorElement.style.display = "none";
+            }
+        }
+
+        // Obtener tramos personalizados
+        function obtenerTramosPersonalizados() {
+            const lineas = Array.from(document.querySelectorAll(".pago-linea"));
+            const tramos = [];
+            
+            lineas.forEach(linea => {
+                const tipo = linea.querySelector(".tipo-pago").value;
+                const porcentaje = parseFloat(linea.querySelector(".porcentaje").value) || 0;
+                let dias = 0;
+                
+                if (tipo === "Cheque") {
+                    dias = parseInt(linea.querySelector(".dias").value) || 0;
+                }
+                
+                tramos.push({ porcentaje, dias });
+            });
+            
+            return tramos;
+        }
+
+        // Función para mostrar/ocultar el modal de reglas de negocio
+        function toggleRulesModal(show) {
+            const modal = document.getElementById('rules-modal');
+            if (show) {
+                const clave = prompt("Ingrese la clave para editar parámetros financieros:");
+                if (clave === "FerFer") {
+                    // Copiar valores actuales al modal
+                    document.getElementById('modal-tasa').value = document.getElementById('tasa').value;
+                    document.getElementById('modal-b20').value = document.getElementById('b20').value;
+                    document.getElementById('modal-b30').value = document.getElementById('b30').value;
+                    document.getElementById('modal-b40').value = document.getElementById('b40').value;
+                    document.getElementById('modal-b50').value = document.getElementById('b50').value;
+                    document.getElementById('modal-b60').value = document.getElementById('b60').value;
+                    
+                    modal.style.display = 'flex';
+                } else if (clave !== null) {
+                    alert("Clave incorrecta");
+                }
+            } else {
+                modal.style.display = 'none';
+            }
+        }
+
+        // Función para guardar los cambios del modal
+        function saveRules() {
+            // Copiar valores del modal a los campos principales
+            document.getElementById('tasa').value = document.getElementById('modal-tasa').value;
+            document.getElementById('b20').value = document.getElementById('modal-b20').value;
+            document.getElementById('b30').value = document.getElementById('modal-b30').value;
+            document.getElementById('b40').value = document.getElementById('modal-b40').value;
+            document.getElementById('b50').value = document.getElementById('modal-b50').value;
+            document.getElementById('b60').value = document.getElementById('modal-b60').value;
+            
+            // Ocultar modal
+            document.getElementById('rules-modal').style.display = 'none';
+            
+            // Recalcular
+            calcular();
+        }
+
+        function calcular() {
+            try {
+                // Obtener valores
+                const montoBase = parsearNumeroFormateado(document.getElementById("monto").value);
+                const iva = parseFloat(document.getElementById("iva").value) || 0;
+                const iibb = parseFloat(document.getElementById("iibb").value) || 0;
+                const formaPago = document.getElementById("formaPago").value;
+                
+                // Validación básica
+                if (montoBase <= 0) {
+                    alert("Ingrese un monto válido");
+                    return;
+                }
+
+                // Cálculos
+                const montoTotal = montoBase * (1 + (iva / 100) + (iibb / 100));
+                let tramos = [];
+                let costoForzado = null;
+                let esForzado = false;
+
+                // Verificar si es una opción con costo forzado
+                if (formaPago in COSTOS_FORZADOS) {
+                    const config = COSTOS_FORZADOS[formaPago];
+                    tramos = config.tramos;
+                    if (config.porcentaje) {
+                        costoForzado = (montoTotal * config.porcentaje) / 100;
+                    }
+                    esForzado = true;
+                } else if (formaPago === "PERSONALIZADO") {
+                    // Obtener tramos personalizados
+                    tramos = obtenerTramosPersonalizados();
+                    esForzado = false;
+                } else {
+                    // Procesamiento normal
+                    tramos = formaPago.split(";").map(t => {
+                        const [p, d] = t.split(",").map(Number);
+                        return { porcentaje: p, dias: d };
+                    });
+                }
+
+                // Mostrar monto en ARS si está en pesos
+                if (enPesos) {
+                    document.getElementById('monto-ars').textContent = formatearNumero(montoBase);
+                }
+
+                // Generar tabla
+                const tbody = document.querySelector("#resultado tbody");
+                tbody.innerHTML = "";
+                let totalCF = 0;
+                let cfBrutoTotal = 0;
+                let bonificadoTotal = 0;
+                let contado = 0;
+
+                if (!esForzado) {
+                    // Lógica para opciones normales (con transferencia)
+                    tramos.forEach(t => {
+                        if (t.dias === 0) contado += t.porcentaje;
+                    });
+
+                    let diasBonificados = 0;
+                    if (contado >= 60) diasBonificados = parseFloat(document.getElementById("b60").value) || 0;
+                    else if (contado >= 50) diasBonificados = parseFloat(document.getElementById("b50").value) || 0;
+                    else if (contado >= 40) diasBonificados = parseFloat(document.getElementById("b40").value) || 0;
+                    else if (contado >= 30) diasBonificados = parseFloat(document.getElementById("b30").value) || 0;
+                    else if (contado >= 20) diasBonificados = parseFloat(document.getElementById("b20").value) || 0;
+
+                    // Calcular cada tramo
+                    tramos.forEach(t => {
+                        const importe = montoTotal * (t.porcentaje / 100);
+                        const tasaAnual = parseFloat(document.getElementById("tasa").value) || 0;
+                        const cfBruto = calcularInteres(importe, tasaAnual, t.dias);
+                        const bonif = (t.dias <= diasBonificados && t.dias > 0) ? cfBruto : 0;
+                        const bonifUSD = bonif;
+                        const cfNeto = cfBruto - bonifUSD;
+                        
+                        totalCF += cfNeto;
+                        cfBrutoTotal += cfBruto;
+                        bonificadoTotal += bonifUSD;
+
+                        // Determinar tipo de pago
+                        const tipoPago = t.dias === 0 ? "Transferencia" : "Cheque";
+                        const esBonificado = bonif > 0;
+                        const costoFinal = esBonificado ? bonifUSD : cfNeto;
+
+                        const fila = tbody.insertRow();
+                        
+                        // Aplicar estilo según el tipo de costo
+                        let claseCosto = '';
+                        if (t.dias === 0) {
+                            claseCosto = 'costo-cero';
+                        } else if (esBonificado) {
+                            claseCosto = 'costo-empresa';
+                        } else {
+                            claseCosto = 'costo-cliente';
+                        }
+                        
+                        fila.innerHTML = `
+                            <td>${tipoPago}</td>
+                            <td>${t.porcentaje}%</td>
+                            <td>${t.dias}</td>
+                            <td>${enPesos ? 'AR$' : 'USD'} ${formatearNumero(importe)}</td>
+                            <td class="${claseCosto}">${enPesos ? 'AR$' : 'USD'} ${formatearNumero(costoFinal)}</td>
+                        `;
+                    });
+                } else {
+                    // Lógica para opciones forzadas (solo cheques)
+                    const config = COSTOS_FORZADOS[formaPago];
+                    const tasaAnual = parseFloat(document.getElementById("tasa").value) || 0;
+                    
+                    // 1. Calcular costo real según tasa (interés simple racional)
+                    cfBrutoTotal = tramos.reduce((acc, t) => {
+                        const importe = montoTotal * (t.porcentaje / 100);
+                        const interes = calcularInteres(importe, tasaAnual, t.dias);
+                        return acc + interes;
+                    }, 0);
+                    
+                    // 2. Determinar costo forzado si existe
+                    let costoForzado = config.porcentaje ? 
+                        (montoTotal * config.porcentaje / 100) : cfBrutoTotal;
+                    
+                    // 3. Comparar y bonificar si es necesario
+                    if (cfBrutoTotal > costoForzado) {
+                        bonificadoTotal = cfBrutoTotal - costoForzado;
+                        totalCF = costoForzado;
+                    } else {
+                        totalCF = cfBrutoTotal;
+                        bonificadoTotal = 0;
+                    }
+
+                    // Mostrar en tabla
+                    tramos.forEach(t => {
+                        const importe = montoTotal * (t.porcentaje / 100);
+                        const cfBruto = calcularInteres(importe, tasaAnual, t.dias);
+                        let bonif = 0;
+                        let bonifUSD = 0;
+                        let cfNeto = cfBruto;
+
+                        if (config.porcentaje && cfBrutoTotal > costoForzado) {
+                            const proporcion = t.porcentaje / 100;
+                            bonifUSD = (cfBrutoTotal - costoForzado) * proporcion;
+                            bonif = bonifUSD;
+                            cfNeto = cfBruto - bonifUSD;
+                        }
+
+                        const esBonificado = bonif > 0;
+                        const costoFinal = esBonificado ? bonifUSD : cfNeto;
+
+                        const fila = tbody.insertRow();
+                        
+                        fila.innerHTML = `
+                            <td>Cheque</td>
+                            <td>${t.porcentaje.toFixed(2)}%</td>
+                            <td>${t.dias}</td>
+                            <td>${enPesos ? 'AR$' : 'USD'} ${formatearNumero(importe)}</td>
+                            <td class="${esBonificado ? 'costo-empresa' : 'costo-cliente'}">${enPesos ? 'AR$' : 'USD'} ${formatearNumero(costoFinal)}</td>
+                        `;
+                    });
+                }
+
+                // Actualizar las tarjetas de resumen
+                const totalOperacion = montoTotal;
+                const costoFinancieroTotal = totalCF + bonificadoTotal;
+                const absorbido = bonificadoTotal;
+                const trasladado = totalCF;
+                
+                // Actualizar tarjeta de total operación
+                const totalOperacionElement = document.querySelector('.card-total .amount');
+                totalOperacionElement.textContent = `${enPesos ? 'AR$' : 'USD'} ${formatearNumero(totalOperacion)}`;
+                totalOperacionElement.style.fontSize = '32px';
+                
+                // Actualizar tarjeta de costo financiero total
+                const costoFinancieroElement = document.querySelectorAll('.card-total')[1].querySelector('.amount');
+                costoFinancieroElement.textContent = `${enPesos ? 'AR$' : 'USD'} ${formatearNumero(costoFinancieroTotal)}`;
+                costoFinancieroElement.style.fontSize = '24px';
+                document.getElementById('costo-financiero-percentage').textContent = `${((costoFinancieroTotal / totalOperacion) * 100).toFixed(2)}% del total`;
+                
+                // Actualizar tarjeta empresa
+                document.querySelector('.card-absorbed .amount').textContent = `${enPesos ? 'AR$' : 'USD'} ${formatearNumero(absorbido)}`;
+                document.getElementById('absorbido-percentage').textContent = `${((absorbido / totalOperacion) * 100).toFixed(2)}% del total`;
+                
+                // Actualizar tarjeta cliente
+                document.querySelector('.card-transferred .amount').textContent = `${enPesos ? 'AR$' : 'USD'} ${formatearNumero(trasladado)}`;
+                document.getElementById('trasladado-percentage').textContent = `${((trasladado / totalOperacion) * 100).toFixed(2)}% del total`;
+
+            } catch (error) {
+                console.error("Error en calcular:", error);
+            }
+        }
+
+        // Event listeners
+        document.addEventListener('DOMContentLoaded', function() {
+            // Asignar eventos
+            document.getElementById("formaPago").addEventListener("change", function() {
+                actualizarNotaForzado();
+                manejarFormaPagoPersonalizada();
+                calcular();
+            });
+            
+            document.querySelectorAll("input:not(#monto)").forEach(function(input) {
+                input.addEventListener("input", calcular);
+            });
+            
+            document.getElementById("iva").addEventListener("change", calcular);
+            document.getElementById("iibb").addEventListener("change", calcular);
+            
+            // Botón para agregar línea de pago
+            document.getElementById("agregar-linea").addEventListener("click", agregarLineaPago);
+            
+            // Toggle de conversión
+            document.getElementById("toggle-conversion").addEventListener("change", convertirAPesos);
+            
+            // Botón para mostrar reglas de negocio
+            document.getElementById("show-rules-btn").addEventListener("click", function(e) {
+                e.preventDefault();
+                toggleRulesModal(true);
+            });
+            
+            // Botones del modal
+            document.querySelector(".close-modal").addEventListener("click", function() {
+                toggleRulesModal(false);
+            });
+            
+            document.getElementById("cancel-rules").addEventListener("click", function() {
+                toggleRulesModal(false);
+            });
+            
+            document.getElementById("save-rules").addEventListener("click", saveRules);
+            
+            // Ejecutar inicializaciones
+            actualizarNotaForzado();
+            manejarFormaPagoPersonalizada();
+            actualizarMoneda();
+            calcular();
+            
+            // Ocultar parámetros financieros inicialmente
+            document.getElementById('param-box').style.display = 'none';
+        });
+    </script>
+</body>
+</html>
